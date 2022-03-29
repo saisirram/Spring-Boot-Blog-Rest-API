@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sai.blog.entity.Role;
 import com.sai.blog.entity.User;
+import com.sai.blog.payload.JWTAuthResponse;
 import com.sai.blog.payload.LoginDto;
 import com.sai.blog.payload.SignUpDto;
 import com.sai.blog.repository.RoleRepository;
 import com.sai.blog.repository.UserRepository;
+import com.sai.blog.security.JwtTokenProvider;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,13 +41,19 @@ public class AuthController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-
+	@Autowired
+	private JwtTokenProvider tokenProvider;
+	
 	@PostMapping("/signin")
-	public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto) {
+	public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto loginDto) {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
 		
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		return new ResponseEntity<>("user signed in successfully!. ", HttpStatus.OK);
+		
+		//get token from token provider class
+		String token = tokenProvider.generateToken(authentication);
+		
+		return ResponseEntity.ok(new JWTAuthResponse(token));
 	}
 	
 	@PostMapping("/signup")
