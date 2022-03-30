@@ -20,6 +20,10 @@ import com.sai.blog.payload.PostResponse;
 import com.sai.blog.service.PostService;
 import com.sai.blog.utils.AppConstants;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api(value = "CRUD REST APIs for Post Resource")
 @RestController
 @RequestMapping("/api")
 public class PostController {
@@ -31,12 +35,14 @@ public class PostController {
 		this.postService = postService;
 	}
 
+	@ApiOperation(value = " Create Post REST Api")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/posts")
 	public ResponseEntity<PostDto> createPost(@Valid @RequestBody PostDto postDto) {
 		return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
 	}
 
+	@ApiOperation(value = " Get all Posts REST Api")
 	@GetMapping("/posts")
 	public PostResponse getAllPosts(@RequestParam(name = AppConstants.DEFAULT_PAGE_NUMBER, defaultValue = "0", required = false) int pageNo,
 			@RequestParam(name = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
@@ -45,17 +51,20 @@ public class PostController {
 		return postService.getAllPosts(pageNo, pageSize,sortBy,sortDir);
 	}
 
+	@ApiOperation(value = " Get Post by id REST Api")
 	@GetMapping("/posts/{id}")
 	public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
 		return new ResponseEntity<>(postService.getPostById(id), HttpStatus.OK);
 	}
 
+	@ApiOperation(value = " Update Post REST Api")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/posts/{id}")
 	public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable(name = "id") Long id) {
 		return new ResponseEntity<>(postService.updatePost(postDto, id), HttpStatus.OK);
 	}
 
+	@ApiOperation(value = " Delete Post by id REST Api")
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/posts/{id}")
 	public ResponseEntity<String> deletePostById(@PathVariable Long id) {

@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,13 +30,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private JwtAuthenticationEntryPoint authenticationEntryPoint;
-	
+
 	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter()
-	{
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter();
 	}
-	
+
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -51,10 +51,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.and()
 		.authorizeRequests()
 		.antMatchers(HttpMethod.GET, "/api/**").permitAll()
-		.antMatchers("/api/auth/**").permitAll().anyRequest()
-		.authenticated();
-		
+		.antMatchers("/api/auth/**").permitAll()
+		.antMatchers("v2/api-docs/**").permitAll()
+		.antMatchers("/swagger-ui/**").permitAll()
+		.antMatchers("/swagger-resources/**").permitAll()
+		.antMatchers("/configuration/security").permitAll()
+		.antMatchers("/swagger-ui.html").permitAll()
+		.antMatchers("/webjars/**").permitAll()
+		.anyRequest().authenticated();
+
 		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+	}
+
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers("/v2/api-docs", 
+				"/configuration/ui",
+				"/swagger-resources/**",
+				"/configuration/security",
+				"/swagger-ui/**",
+				"/swagger-ui.html",
+				"/webjars/**");
 	}
 
 // In Memory User Details Authentication  (not at all good to do)
